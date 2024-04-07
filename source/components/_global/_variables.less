@@ -1,5 +1,9 @@
+@colors-main: #000000;
+@colors-primary: #ffffff;
+@colors-secondary: #f2f2f2;
+
 #background-colors() {
-    main: #f2f2f2;
-    primary: #ffffff;
+    main: fade(@colors-main, 50%); // @colors-main;
+    primary: @colors-primary;
     secondary: #f2f2f2;
 }
