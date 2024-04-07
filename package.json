@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "test gulp",
   "main": "index.html",
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -10,6 +11,7 @@
   "license": "ISC",
   "devDependencies": {
     "browser-sync": "^3.0.2",
+    "del": "^7.1.0",
     "gulp": "^5.0.0",
     "gulp-include": "^2.4.1",
     "gulp-less": "^5.0.0"

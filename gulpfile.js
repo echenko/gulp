@@ -1,83 +1,94 @@
-const gulp = require('gulp');
-const less = require('gulp-less');
-const include = require('gulp-include');
-const browser = require('browser-sync');
-const fs = require('fs');
+import gulp from 'gulp';
+import include from 'gulp-include';
+import less from 'gulp-less';
+import { deleteAsync } from 'del';
+import browser from 'browser-sync';
 
-
-// default
-function defaultTask(cb) {
-    console.log('gulp is running...');
-    cb()
+const paths = {
+    pages: {
+        src: 'source/*.html',
+        dest: 'public/'
+    },
+    includes: {
+        src: 'source/components/**/',
+    },
+    styles: {
+        src: 'source/styles/**/*.less',
+        dest: 'public/styles/'
+    },
+    images: {
+        src: 'source/images/**/*.{jpg,jpeg,png,svg}',
+        dest: 'public/images/'
+    },
+    cleaner: {
+        public: 'public',
+        images: 'public/images'
+    },
+    server: {
+        baseDir: 'public',
+        index: 'index.html'
+    },
+    watcher: {
+        pages: 'source/**/*.html',
+        styles: 'source/**/*.less',
+        images: 'source/images/**/*.{jpg,jpeg,png,svg}'
+    }
 }
 
 // pages
-function pages() {
-    return gulp.src('source/*.html')
-        .pipe(include({
-            includePaths: './source/components/**/',
-        }))
-        .pipe(gulp.dest('public'))
-        .pipe(browser.stream());
+export const pages = () => {
+    return gulp.src(paths.pages.src)
+        .pipe(include({ includePaths: paths.includes.src, }))
+        .pipe(gulp.dest(paths.pages.dest))
 }
 
 // styles
-function styles() {
-    return gulp.src('source/styles/*.less')
+export const styles = () => {
+    return gulp.src(paths.styles.src)
         .pipe(less())
-        .pipe(gulp.dest('public/styles'))
-        .pipe(browser.stream());
+        .pipe(gulp.dest(paths.styles.dest))
+}
+
+// images
+export const images = () => {
+    return gulp.src(paths.images.src, { encoding: false })
+            .pipe(gulp.dest(paths.images.dest))
+}
+
+// cleaner
+export const cleaner = () => {
+    return deleteAsync(paths.cleaner.public, { read: false, allowEmpty: true })
+}
+
+// watch
+export const watcher = () => {
+    gulp.watch(paths.watcher.pages, pages).on('change', browser.reload)
+    gulp.watch(paths.watcher.styles, styles).on('change', browser.reload)
+    gulp.watch(paths.watcher.images, images).on('change', browser.reload)
 }
 
 // server
-function server() {
+export const server = () => {
     browser.init({
         server: {
-            baseDir: 'public',
+            baseDir: paths.server.baseDir,
+            index: paths.server.index
         },
-        cors: true,
-        notify: false,
-        ui: false,
+        port: 8080
     });
 }
 
-// watcher
-function watcher() {
-    gulp.watch('./source/**/*.html', gulp.parallel(pages), browser.reload);
-    gulp.watch('./source/**/*.less', gulp.parallel(styles), browser.reload);
-    gulp.watch('./source/fonts/**/*.*', gulp.parallel(copyFonts), browser.reload);
-    gulp.watch('./source/images/**/*.*', gulp.parallel(copyImages), browser.reload);
-}
+// start
+export const start = gulp.series(
+    cleaner,
+    gulp.parallel(pages, styles, images),
+    gulp.parallel(watcher, server)
+)
 
-// copy fonts
-function copyFonts() {
-    return gulp.src('./source/fonts/**/*')
-        .pipe(gulp.dest('./public/fonts/'))
-        .pipe(browser.stream());
-}
-
-// copy images
-function copyImages() {
-    return gulp.src('./source/images/**/*')
-        .pipe(gulp.dest('./public/images/'))
-        .pipe(browser.stream())
-}
-
-// clean fs
-function fsClean(done) {
-    fs.rmSync('./public/', { recursive: true, force: true })
-    done();
-}
-
-
-// exports
-exports.pages = pages;
-exports.styles = styles;
-exports.server = server;
-exports.watcher = watcher;
-exports.default = defaultTask;
-exports.fsClean = fsClean;
-exports.copyFonts = copyFonts;
-exports.copyImages = copyImages;
-exports.start = gulp.series(fsClean, pages, styles, copyFonts, copyImages, gulp.parallel(server, watcher));
-exports.build = gulp.parallel(fsClean, pages, styles, copyFonts, copyImages);
+// build
+export const build = gulp.series(
+    cleaner,
+    pages,
+    styles,
+    images
+)
