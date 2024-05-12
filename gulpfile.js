@@ -7,6 +7,8 @@ import rename from 'gulp-rename';
 import sourcemaps from 'gulp-sourcemaps';
 import cleanCSS from 'gulp-clean-css';
 import autoprefixer from 'gulp-autoprefixer';
+import sharp from 'gulp-sharp-responsive';
+// import imagemin from 'gulp-imagemin';
 
 
 // paths
@@ -23,7 +25,7 @@ const paths = {
         dest: 'public/styles/'
     },
     images: {
-        src: 'source/images/**/*.{jpg,jpeg,png,svg}',
+        src: 'source/images/**/*.{jpg,jpeg,png}',
         dest: 'public/images/'
     },
     fonts: {
@@ -32,8 +34,8 @@ const paths = {
     },
     cleaner: {
         public: 'public',
-        images: 'public/images/**/*.{jpg,jpeg,png,svg}',
-        fonts: 'public/fonts/**/*.{woff,woff2,ttf}',
+        images: 'public/images/**/*.{jpg,jpeg,png,webp}',
+        fonts: 'public/fonts/**/*.*',
     },
     server: {
         baseDir: 'public',
@@ -42,7 +44,7 @@ const paths = {
     watcher: {
         pages: 'source/**/*.html',
         styles: 'source/**/*.less',
-        images: 'source/images/**/*.{jpg,jpeg,png,svg}',
+        images: 'source/images/**/*.{jpg,jpeg,png,svg,webp}',
         fonts: 'source/fonts/**/*.{woff,woff2,ttf}'
     }
 }
@@ -79,6 +81,15 @@ export const fonts = () => {
 export const images = () => {
     return deleteAsync(paths.cleaner.images, { read: false, allowEmpty: true }),
         gulp.src(paths.images.src, { encoding: false })
+            .pipe(sharp({
+                formats: [
+                    { width: (metadata) => Math.ceil(metadata.width * 1), rename: { suffix: "@2x" }, format: "webp"},
+                    { width: (metadata) => Math.ceil(metadata.width * 1), rename: { suffix: "@2x" }},
+                    { width: (metadata) => Math.ceil(metadata.width * 0.5), rename: { suffix: "@1x" }, format: "webp"}, 
+                    { width: (metadata) => Math.ceil(metadata.width * 0.5), rename: { suffix: "@1x" }}
+                ]
+              }))
+            // .pipe(imagemin())
             .pipe(gulp.dest(paths.images.dest))
 }
 

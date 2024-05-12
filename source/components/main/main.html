@@ -2,5 +2,9 @@
     <h2 class="page-main__title">Main</h2>
     <p class="page-main__text">This is main</p>
     <!-- =include "hero.html" -->
-    <img src="images/main/test.jpg" alt="test" width="500" height="auto">
+    <picture>
+        <source media="(min-width: 1440px)" srcset="images/main/test@1x.jpg 1x" srcset="images/main/test@2x.jpg 2x" width="500" height=""
+        type="image/svg+xml">
+        <img src="images/main/test@1x.jpg 1x" srcset="images/main/test@2x.jpg 2x" alt="test" width="500" height="auto">
+    </picture>   
 </main>
